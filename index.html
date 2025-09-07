@@ -2,332 +2,564 @@
 <html lang="ar" dir="rtl">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>إرسال بلاغ</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-<style>
-:root {
-    --primary: #ff4c4c;
-    --secondary: #33a377;
-    --bg: #0d0d0d;
-    --card: #1c1c1c;
-    --field: #2b2b2b;
-    --text: #ffffff;
-    --muted: #bcbcbc;
-    --dock: #1a1a1acc;
-    --border: #2a2a2a;
-}
-body.light {
-    --bg: #f7f7f7;
-    --card: #fff;
-    --field: #f0f0f0;
-    --text: #1f1f1f;
-    --muted: #555;
-    --dock: #ffffffcc;
-    --border: #e6e6e6;
-}
-* {box-sizing:border-box;margin:0;padding:0;}
-html, body {
-    height: 100%;
-    font-family:'Poppins', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    position: relative;
-    overflow-y: auto; /* السماح بالسكرول للصفحة الثانية */
-}
-body::before {
-    content:'';
-    position:fixed; top:0; left:0;
-    width:100%; height:100%;
-    z-index:-1;
-    background: linear-gradient(270deg,#0d0d0d,#1a1a1a,#0d0d0d);
-    background-size:600% 600%;
-    animation:grad 30s ease infinite;
-}
-@keyframes grad{
-    0%{background-position:0% 50%}
-    50%{background-position:100% 50%}
-    100%{background-position:0% 50%}
-}
-
-/* Intro Screen */
-#introScreen {
-    position: fixed;
-    inset:0;
-    background: var(--bg);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
-    overflow:hidden; /* تمنع scroll داخل intro */
-}
-#introScreen h1 {color:var(--primary); font-size:2rem; margin-bottom:1rem; animation:fadeIn 1s ease forwards;}
-#introScreen p {color:var(--muted); margin-bottom:2rem; animation:fadeIn 1.2s ease forwards;}
-#nextBtn {
-    padding:12px 24px; border:none; border-radius:12px;
-    background: var(--secondary); color:#fff;
-    cursor:pointer; font-weight:600;
-    transition: transform .2s ease;
-}
-#nextBtn:hover {transform:scale(1.05);}
-#introIcon {
-    font-size:4rem;
-    color:var(--primary);
-    margin-bottom:1rem;
-    animation:iconBounce 1.5s ease infinite alternate;
-}
-@keyframes fadeIn {from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);}}
-@keyframes iconBounce {0%{transform:translateY(0);} 100%{transform:translateY(-15px);}}
-
-/* Floating Bubbles */
-.bubble {
-    position:absolute;
-    border-radius:50%;
-    opacity:0.15;
-    pointer-events:none;
-}
-
-/* Header */
-header {
-    position:sticky; top:0; z-index:10;
-    text-align:center;
-    padding:2rem 1rem;
-    background: linear-gradient(135deg,#000,#171717);
-    border-bottom:1px solid var(--border);
-    transform:translateY(-80px); opacity:0;
-    transition: transform .9s ease, opacity .9s ease;
-}
-body.light header {background:linear-gradient(135deg,#fff,#ececec);}
-header.show {transform:translateY(0); opacity:1;}
-header h1{color:var(--primary); font-size:clamp(1.4rem,2.5vw,2.2rem); margin-bottom:.35rem;}
-header p{color:var(--muted); font-size:.95rem;}
-.toggle {
-    position:absolute; inset-inline-start:12px; top:12px;
-    border:none; cursor:pointer; border-radius:999px;
-    background:var(--primary); color:#fff; width:42px; height:42px;
-    display:grid; place-items:center; box-shadow:0 6px 18px rgba(0,0,0,.25);
-    transition:transform .2s ease, background .2s ease;
-}
-.toggle:hover{transform:translateY(-2px);}
-body.light .toggle{background:#ff6b6b;}
-
-/* Emails */
-.emails-box {
-    display:grid; grid-template-columns:repeat(5,minmax(52px,64px));
-    justify-content:center; gap:12px; padding:1rem; margin:1rem auto 0;
-}
-@media(max-width:520px){
-    .emails-box{grid-template-columns:repeat(5,minmax(46px,56px)); gap:10px}
-}
-.emails-box .item{
-    height:64px; background:var(--card); border:1px solid var(--border); border-radius:14px;
-    display:grid; place-items:center; cursor:pointer; user-select:none;
-    transform:translateY(40px) scale(.98); opacity:0;
-    transition: transform .5s ease, opacity .5s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
-}
-.emails-box .item i{font-size:22px; color:#fff;}
-body.light .emails-box .item i{color:#333;}
-.emails-box .item.show{transform:translateY(0) scale(1); opacity:1}
-.emails-box .item:hover{box-shadow:0 10px 28px rgba(0,0,0,.28); transform:translateY(-4px) scale(1.03)}
-.emails-box .item.active{outline:2px solid var(--secondary); box-shadow:0 0 0 6px rgba(51,163,119,.15)}
-
-/* Form */
-.form-container{
-    width:min(96%,560px); margin:1rem auto 2rem;
-    background:var(--card); border:1px solid var(--border); padding:1.5rem;
-    border-radius:16px; box-shadow:0 12px 30px rgba(0,0,0,.28);
-    transform:translateY(80px); opacity:0;
-    transition:transform .9s ease, opacity .9s ease;
-}
-.form-container.show{transform:translateY(0); opacity:1;}
-.form-container h2{text-align:center; margin-bottom:1.1rem; color:var(--secondary); font-size:1.2rem;}
-.row{display:grid; gap:12px; grid-template-columns:1fr;}
-.form-group{position:relative;}
-.input,.textarea{
-    width:100%; border:1px solid var(--border); outline:none;
-    background:var(--field); color:var(--text);
-    border-radius:12px; padding:12px 40px 12px 12px;
-    font-size:.95rem; transition:border-color .25s ease, box-shadow .25s ease, transform .08s ease;
-}
-.input:focus,.textarea:focus{
-    border-color:var(--secondary);
-    box-shadow:0 0 0 4px rgba(51,163,119,.15);
-    transform:scale(1.02);
-}
-.btn{
-    width:100%; border:none; cursor:pointer; font-weight:700;
-    padding:12px 14px; border-radius:12px; color:#fff;
-    background:linear-gradient(135deg,#2cc58d,#229a71);
-    transition:transform .08s ease, box-shadow .25s ease, filter .2s ease;
-}
-.btn:hover{transform:translateY(-2px) scale(1.02); box-shadow:0 14px 28px rgba(0,0,0,.25);}
-.btn:active{transform:translateY(0);}
-.btn .spin{display:none; width:18px; height:18px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; margin-inline-start:8px; vertical-align:-3px;}
-.btn.loading .spin{display:inline-block;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* Social Bar */
-.social-bar{display:flex; justify-content:center; gap:12px; padding:12px 0; background:var(--dock); border-top:1px solid var(--border);}
-.social-bar a{width:42px; height:42px; display:grid; place-items:center; border-radius:999px; background:transparent; color:#fff; text-decoration:none; transition:transform .15s ease, background .2s ease; position:relative;}
-.social-bar a:hover{transform:translateY(-2px); background:rgba(255,255,255,.1);}
-body.light .social-bar a{color:#111;}
-
-/* Footer */
-footer{text-align:center; color:var(--muted); padding:24px 10px 24px; border-top:1px solid var(--border); margin-top:20px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>إرسال بلاغ</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --primary: #ff4c4c;
+            --secondary: #33a377;
+            --bg: #0d0d0d;
+            --card: #1c1c1c;
+            --field: #2b2b2b;
+            --text: #ffffff;
+            --muted: #bcbcbc;
+            --dock: #1a1a1acc;
+            --border: #2a2a2a;
+        }
+        
+        body.light {
+            --bg: #f7f7f7;
+            --card: #fff;
+            --field: #f0f0f0;
+            --text: #1f1f1f;
+            --muted: #555;
+            --dock: #ffffffcc;
+            --border: #e6e6e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html,
+        body {
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            position: relative;
+            overflow-y: auto;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(270deg, #0d0d0d, #1a1a1a, #0d0d0d);
+            background-size: 600% 600%;
+            animation: grad 30s ease infinite;
+        }
+        
+        @keyframes grad {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
+        }
+        /* Intro Screen */
+        
+        #introScreen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            overflow: hidden;
+            /* تمنع scroll داخل intro */
+        }
+        
+        #introScreen h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 1s ease forwards;
+        }
+        
+        #introScreen p {
+            color: var(--muted);
+            margin-bottom: 2rem;
+            animation: fadeIn 1.2s ease forwards;
+        }
+        
+        #nextBtn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            background: var(--secondary);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform .2s ease;
+        }
+        
+        #nextBtn:hover {
+            transform: scale(1.05);
+        }
+        
+        #introIcon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            animation: iconBounce 1.5s ease infinite alternate;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes iconBounce {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-15px);
+            }
+        }
+        /* Floating Bubbles */
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        /* Header */
+        
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #000, #171717);
+            border-bottom: 1px solid var(--border);
+            transform: translateY(-80px);
+            opacity: 0;
+            transition: transform .9s ease, opacity .9s ease;
+        }
+        
+        body.light header {
+            background: linear-gradient(135deg, #fff, #ececec);
+        }
+        
+        header.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        header h1 {
+            color: var(--primary);
+            font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+            margin-bottom: .35rem;
+        }
+        
+        header p {
+            color: var(--muted);
+            font-size: .95rem;
+        }
+        
+        .toggle {
+            position: absolute;
+            inset-inline-start: 12px;
+            top: 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 999px;
+            background: var(--primary);
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+            transition: transform .2s ease, background .2s ease;
+        }
+        
+        .toggle:hover {
+            transform: translateY(-2px);
+        }
+        
+        body.light .toggle {
+            background: #ff6b6b;
+        }
+        /* Emails */
+        
+        .emails-box {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(52px, 64px));
+            justify-content: center;
+            gap: 12px;
+            padding: 1rem;
+            margin: 1rem auto 0;
+        }
+        
+        @media(max-width:520px) {
+            .emails-box {
+                grid-template-columns: repeat(5, minmax(46px, 56px));
+                gap: 10px
+            }
+        }
+        
+        .emails-box .item {
+            height: 64px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            user-select: none;
+            transform: translateY(40px) scale(.98);
+            opacity: 0;
+            transition: transform .5s ease, opacity .5s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+        
+        .emails-box .item i {
+            font-size: 22px;
+            color: #fff;
+        }
+        
+        body.light .emails-box .item i {
+            color: #333;
+        }
+        
+        .emails-box .item.show {
+            transform: translateY(0) scale(1);
+            opacity: 1
+        }
+        
+        .emails-box .item:hover {
+            box-shadow: 0 10px 28px rgba(0, 0, 0, .28);
+            transform: translateY(-4px) scale(1.03)
+        }
+        
+        .emails-box .item.active {
+            outline: 2px solid var(--secondary);
+            box-shadow: 0 0 0 6px rgba(51, 163, 119, .15)
+        }
+        /* Form */
+        
+        .form-container {
+            width: min(96%, 560px);
+            margin: 1rem auto 2rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+            transform: translateY(80px);
+            opacity: 0;
+            transition: transform .9s ease, opacity .9s ease;
+        }
+        
+        .form-container.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 1.1rem;
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+        
+        .row {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 1fr;
+        }
+        
+        .form-group {
+            position: relative;
+        }
+        
+        .input,
+        .textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            outline: none;
+            background: var(--field);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 12px 40px 12px 12px;
+            font-size: .95rem;
+            transition: border-color .25s ease, box-shadow .25s ease, transform .08s ease;
+        }
+        
+        .input:focus,
+        .textarea:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(51, 163, 119, .15);
+            transform: scale(1.02);
+        }
+        
+        .btn {
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, #2cc58d, #229a71);
+            transition: transform .08s ease, box-shadow .25s ease, filter .2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, .25);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn .spin {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            margin-inline-start: 8px;
+            vertical-align: -3px;
+        }
+        
+        .btn.loading .spin {
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        /* Social Bar */
+        
+        .social-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px 0;
+            background: var(--dock);
+            border-top: 1px solid var(--border);
+        }
+        
+        .social-bar a {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            background: transparent;
+            color: #fff;
+            text-decoration: none;
+            transition: transform .15s ease, background .2s ease;
+            position: relative;
+        }
+        
+        .social-bar a:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, .1);
+        }
+        
+        body.light .social-bar a {
+            color: #111;
+        }
+        /* Footer */
+        
+        footer {
+            text-align: center;
+            color: var(--muted);
+            padding: 24px 10px 24px;
+            border-top: 1px solid var(--border);
+            margin-top: 20px;
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- Intro Screen -->
-<div id="introScreen">
-    <div id="introIcon"><i class="fa-solid fa-flag"></i></div>
-    <h1>موقع البلاغات</h1>
-    <p>تم تطوير هذا الموقع لتسهيل إرسال البلاغات عبر البريد</p>
-    <button id="nextBtn">التالي</button>
-</div>
+    <!-- Intro Screen -->
+    <div id="introScreen">
+        <div id="introIcon"><i class="fa-solid fa-flag"></i></div>
+        <h1>موقع البلاغات</h1>
+        <p>تم تطوير هذا الموقع لتسهيل إرسال البلاغات عبر البريد</p>
+        <button id="nextBtn">التالي</button>
+    </div>
 
-<header id="hdr">
-    <button class="toggle" id="modeBtn"><i class="fa-solid fa-moon"></i></button>
-    <h1>إرسال بلاغ</h1>
-    <p>اختر البريد المُستهدف ثم أرسل البلاغ</p>
-</header>
+    <header id="hdr">
+        <button class="toggle" id="modeBtn"><i class="fa-solid fa-moon"></i></button>
+        <h1>إرسال بلاغ</h1>
+        <p>اختر البريد المُستهدف ثم أرسل البلاغ</p>
+    </header>
 
-<section class="emails-box" id="emails">
-    <div class="item" data-email="support1@example.com" data-subject="بلاغ عن قناة 1" data-message="مرحبًا فريق الدعم، أبلغ عن قناة مخالفة (1).\nالرابط: https://whatsapp.com/channel/AAAA1111"><i class="fa-solid fa-envelope"></i></div>
-    <div class="item" data-email="support2@example.com" data-subject="بلاغ عن قناة 2" data-message="مرحبًا، هذا بلاغ عن القناة (2)\nالرابط: https://whatsapp.com/channel/BBBB2222"><i class="fa-solid fa-envelope"></i></div>
-    <div class="item" data-email="support3@example.com" data-subject="بلاغ عن قناة 3" data-message="تحية طيبة، أُبلغ عن القناة (3)\nالرابط: https://whatsapp.com/channel/CCCC3333"><i class="fa-solid fa-envelope"></i></div>
-    <div class="item" data-email="support4@example.com" data-subject="بلاغ عن قناة 4" data-message="مرحبًا، يوجد انتهاك في القناة (4)\nالرابط: https://whatsapp.com/channel/DDDD4444"><i class="fa-solid fa-envelope"></i></div>
-    <div class="item" data-email="support5@example.com" data-subject="بلاغ عن قناة 5" data-message="يرجى مراجعة القناة (5)\nالرابط: https://whatsapp.com/channel/EEEE5555"><i class="fa-solid fa-envelope"></i></div>
-</section>
+    <section class="emails-box" id="emails">
+        <div class="item" data-email="support1@example.com" data-subject="بلاغ عن قناة 1" data-message="مرحبًا فريق الدعم، أبلغ عن قناة مخالفة (1).\nالرابط: https://whatsapp.com/channel/AAAA1111"><i class="fa-solid fa-envelope"></i></div>
+        <div class="item" data-email="support2@example.com" data-subject="بلاغ عن قناة 2" data-message="مرحبًا، هذا بلاغ عن القناة (2)\nالرابط: https://whatsapp.com/channel/BBBB2222"><i class="fa-solid fa-envelope"></i></div>
+        <div class="item" data-email="support3@example.com" data-subject="بلاغ عن قناة 3" data-message="تحية طيبة، أُبلغ عن القناة (3)\nالرابط: https://whatsapp.com/channel/CCCC3333"><i class="fa-solid fa-envelope"></i></div>
+        <div class="item" data-email="support4@example.com" data-subject="بلاغ عن قناة 4" data-message="مرحبًا، يوجد انتهاك في القناة (4)\nالرابط: https://whatsapp.com/channel/DDDD4444"><i class="fa-solid fa-envelope"></i></div>
+        <div class="item" data-email="support5@example.com" data-subject="بلاغ عن قناة 5" data-message="يرجى مراجعة القناة (5)\nالرابط: https://whatsapp.com/channel/EEEE5555"><i class="fa-solid fa-envelope"></i></div>
+    </section>
 
-<main class="form-container" id="formCard">
-<h2><i class="fa-solid fa-flag"></i> نموذج البلاغ</h2>
-<form id="reportForm" novalidate>
-    <div class="row">
-        <div class="form-group"><i class="fa-solid fa-user ico"></i>
-            <input class="input" type="email" id="userEmail" placeholder="بريدك الإلكتروني" required />
-        </div>
-        <div class="form-group"><i class="fa-solid fa-envelope ico"></i>
-            <input class="input" type="text" id="targetEmail" value="support1@example.com" readonly />
-        </div>
-        <div class="form-group"><i class="fa-solid fa-pen ico"></i>
-            <input class="input" type="text" id="subject" value="بلاغ عن قناة 1" required />
-        </div>
-        <div class="form-group"><i class="fa-solid fa-message ico"></i>
-            <textarea class="textarea" id="message" rows="5" readonly>مرحبًا فريق الدعم، أبلغ عن قناة مخالفة (1).
+    <main class="form-container" id="formCard">
+        <h2><i class="fa-solid fa-flag"></i> نموذج البلاغ</h2>
+        <form id="reportForm" novalidate>
+            <div class="row">
+                <div class="form-group"><i class="fa-solid fa-user ico"></i>
+                    <input class="input" type="email" id="userEmail" placeholder="بريدك الإلكتروني" required />
+                </div>
+                <div class="form-group"><i class="fa-solid fa-envelope ico"></i>
+                    <input class="input" type="text" id="targetEmail" value="support1@example.com" readonly />
+                </div>
+                <div class="form-group"><i class="fa-solid fa-pen ico"></i>
+                    <input class="input" type="text" id="subject" value="بلاغ عن قناة 1" required />
+                </div>
+                <div class="form-group"><i class="fa-solid fa-message ico"></i>
+                    <textarea class="textarea" id="message" rows="5" readonly>مرحبًا فريق الدعم، أبلغ عن قناة مخالفة (1).
 الرابط: https://whatsapp.com/channel/AAAA1111</textarea>
-        </div>
-        <button type="submit" class="btn" id="sendBtn">
+                </div>
+                <button type="submit" class="btn" id="sendBtn">
             إرسال البلاغ
             <span class="spin"></span>
         </button>
+            </div>
+        </form>
+    </main>
+
+    <div class="social-bar">
+        <a href="https://wa.me/+201278133936" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://www.facebook.com/mustafa.mohammed.918452/" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+        <a href="https://www.linkedin.com/in/mostafa-m9hammed" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+        <a href="https://www.instagram.com/mostafa_mo7a9med" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://github.com/mostafa-m9hammed" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://x.com/m9s5ava" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
     </div>
-</form>
-</main>
 
-<div class="social-bar">
-    <a href="https://wa.me/+201278133936" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-    <a href="https://www.facebook.com/mustafa.mohammed.918452/" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
-    <a href="https://www.linkedin.com/in/mostafa-m9hammed" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-    <a href="https://www.instagram.com/mostafa_mo7a9med" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-    <a href="https://github.com/mostafa-m9hammed" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-    <a href="https://x.com/m9s5ava" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-</div>
+    <footer>
+        <p>© 2025 | All Rights Reserved</p>
+    </footer>
 
-<footer>
-<p>© 2025 | All Rights Reserved</p>
-</footer>
+    <script>
+        // Intro screen logic
+        const introScreen = document.getElementById('introScreen');
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            introScreen.style.display = 'none';
+            document.body.style.overflowY = 'auto'; // تفعيل scroll
+            initPage();
+        });
 
-<script>
-// Intro screen logic
-const introScreen = document.getElementById('introScreen');
-document.getElementById('nextBtn').addEventListener('click', ()=>{
-    introScreen.style.display='none';
-    document.body.style.overflowY = 'auto'; // تفعيل scroll
-    initPage();
-});
+        // Initialize page animations & bubbles
+        function initPage() {
+            document.getElementById('hdr').classList.add('show');
+            document.querySelectorAll('.emails-box .item').forEach((el, i) => {
+                setTimeout(() => el.classList.add('show'), 180 + i * 140);
+            });
+            setTimeout(() => document.getElementById('formCard').classList.add('show'), 900);
 
-// Initialize page animations & bubbles
-function initPage(){
-    document.getElementById('hdr').classList.add('show');
-    document.querySelectorAll('.emails-box .item').forEach((el,i)=>{setTimeout(()=>el.classList.add('show'),180+i*140);});
-    setTimeout(()=>document.getElementById('formCard').classList.add('show'),900);
+            // Floating bubbles on both pages
+            createBubbles(20); // 20 كور
+        }
 
-    // Floating bubbles on both pages
-    createBubbles(20); // 20 كور
-}
+        // Theme toggle
+        const modeBtn = document.getElementById('modeBtn');
+        modeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light');
+            modeBtn.innerHTML = document.body.classList.contains('light') ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        });
 
-// Theme toggle
-const modeBtn = document.getElementById('modeBtn');
-modeBtn.addEventListener('click', ()=>{
-    document.body.classList.toggle('light');
-    modeBtn.innerHTML = document.body.classList.contains('light')?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';
-});
+        // Email selector
+        const emailItems = document.querySelectorAll('.emails-box .item');
+        const targetEmail = document.getElementById('targetEmail');
+        const subjectInput = document.getElementById('subject');
+        const messageInput = document.getElementById('message');
+        emailItems[0].classList.add('active');
+        emailItems.forEach(item => {
+            item.addEventListener('click', () => {
+                emailItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                targetEmail.value = item.dataset.email;
+                subjectInput.value = item.dataset.subject;
+                messageInput.value = item.dataset.message;
+            });
+        });
 
-// Email selector
-const emailItems=document.querySelectorAll('.emails-box .item');
-const targetEmail=document.getElementById('targetEmail');
-const subjectInput=document.getElementById('subject');
-const messageInput=document.getElementById('message');
-emailItems[0].classList.add('active');
-emailItems.forEach(item=>{
-    item.addEventListener('click', ()=>{
-        emailItems.forEach(i=>i.classList.remove('active'));
-        item.classList.add('active');
-        targetEmail.value=item.dataset.email;
-        subjectInput.value=item.dataset.subject;
-        messageInput.value=item.dataset.message;
-    });
-});
+        // Send form
+        const form = document.getElementById('reportForm');
+        const userEmail = document.getElementById('userEmail');
+        const sendBtn = document.getElementById('sendBtn');
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            sendBtn.classList.add('loading');
+            const to = encodeURIComponent(targetEmail.value.trim());
+            const subject = encodeURIComponent(subjectInput.value.trim());
+            const body = encodeURIComponent(`${messageInput.value}\n\n— مرسل من: ${userEmail.value||'غير محدد'}`);
+            const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+            setTimeout(() => {
+                window.location.href = mailto;
+                sendBtn.classList.remove('loading');
+            }, 350);
+        });
 
-// Send form
-const form=document.getElementById('reportForm');
-const userEmail=document.getElementById('userEmail');
-const sendBtn=document.getElementById('sendBtn');
-form.addEventListener('submit', e=>{
-    e.preventDefault();
-    sendBtn.classList.add('loading');
-    const to=encodeURIComponent(targetEmail.value.trim());
-    const subject=encodeURIComponent(subjectInput.value.trim());
-    const body=encodeURIComponent(`${messageInput.value}\n\n— مرسل من: ${userEmail.value||'غير محدد'}`);
-    const mailto=`mailto:${to}?subject=${subject}&body=${body}`;
-    setTimeout(()=>{window.location.href=mailto; sendBtn.classList.remove('loading');},350);
-});
+        // Function to create floating bubbles
+        function createBubbles(count) {
+            for (let i = 0; i < count; i++) {
+                let b = document.createElement('div');
+                b.className = 'bubble';
+                b.style.width = b.style.height = (Math.random() * 25 + 10) + 'px';
+                b.style.background = 'rgba(255,255,255,0.1)';
+                b.style.left = Math.random() * 100 + 'vw';
+                b.style.top = Math.random() * 100 + 'vh';
+                document.body.appendChild(b);
+                animateBubble(b);
+            }
+        }
 
-// Function to create floating bubbles
-function createBubbles(count){
-    for(let i=0;i<count;i++){
-        let b=document.createElement('div');
-        b.className='bubble';
-        b.style.width=b.style.height=(Math.random()*25+10)+'px';
-        b.style.background='rgba(255,255,255,0.1)';
-        b.style.left=Math.random()*100+'vw';
-        b.style.top=Math.random()*100+'vh';
-        document.body.appendChild(b);
-        animateBubble(b);
-    }
-}
+        // Animate bubbles with random movement
+        function animateBubble(b) {
+            let x = Math.random() * window.innerWidth;
+            let y = Math.random() * window.innerHeight;
+            let dx = (Math.random() - 0.5) * 0.5;
+            let dy = (Math.random() - 0.5) * 0.5;
 
-// Animate bubbles with random movement
-function animateBubble(b){
-    let x=Math.random()*window.innerWidth;
-    let y=Math.random()*window.innerHeight;
-    let dx=(Math.random()-0.5)*0.5;
-    let dy=(Math.random()-0.5)*0.5;
-    function move(){
-        x+=dx; y+=dy;
-        if(x<0 || x>window.innerWidth) dx*=-1;
-        if(y<0 || y>window.innerHeight) dy*=-1;
-        b.style.transform=`translate(${x}px,${y}px)`;
-        requestAnimationFrame(move);
-    }
-    move();
-}
-</script>
+            function move() {
+                x += dx;
+                y += dy;
+                if (x < 0 || x > window.innerWidth) dx *= -1;
+                if (y < 0 || y > window.innerHeight) dy *= -1;
+                b.style.transform = `translate(${x}px,${y}px)`;
+                requestAnimationFrame(move);
+            }
+            move();
+        }
+    </script>
 
 </body>
+
 </html>
